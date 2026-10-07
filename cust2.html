@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Happy Birthday Aira</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body { height: 100%; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #e0f2fe;
+            color: #0f172a;
+            min-height: 100vh;
+            min-height: 100dvh;
+            overflow-x: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #loadingScreen {
+            position: fixed; top:0; left:0; width:100%; height:100%;
+            background: #bae6fd;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 99999; padding: 30px; text-align: center;
+            transition: opacity 0.6s ease, visibility 0.6s ease;
+        }
+
+        .loading-gift-icon {
+            font-size: 80px; margin-bottom: 25px;
+            animation: bounceGift 2s ease-in-out infinite;
+            filter: drop-shadow(0 0 20px rgba(244, 114, 182, 0.5));
+        }
+        @keyframes bounceGift { 0%,100%{transform:translateY(0) scale(1);} 50%{transform:translateY(-15px) scale(1.08);} }
+
+        .loading-spinner-ring {
+            position: absolute; width:110px; height:110px;
+            border: 3px solid rgba(244,114,182,0.3); border-top: 3px solid #f472b6;
+            border-radius: 50%; animation: spin 1.2s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .loading-badge-first {
+            display:inline-block; padding:6px 14px; background: rgba(255,255,255,0.8);
+            border:1px solid rgba(244,114,182,0.4); border-radius:20px; font-size:11px; color:#db2777;
+            margin-bottom:12px; text-transform:uppercase; letter-spacing:1.5px; font-weight:700;
+        }
+        .loading-title-first { font-family:'Outfit',sans-serif; font-size:24px; font-weight:700; color:#0c4a6e; margin-bottom:8px; }
+        .loading-subtitle-first { font-size:13.5px; color:#db2777; margin-bottom:25px; line-height:1.5; }
+        .percentage-text { font-family:'Outfit',sans-serif; font-size:13px; color:#0369a1; font-weight:700; margin-bottom:12px; }
+        .progress-track { width:100%; max-width:300px; height:8px; background: rgba(255,255,255,0.6); border-radius:10px; overflow:hidden; margin-bottom:25px; border:1px solid rgba(2,132,199,0.3); }
+        .progress-fill { width:0%; height:100%; background: linear-gradient(90deg,#0284c7,#f472b6); border-radius:10px; transition: width 0.1s linear; }
+
+        .start-web-btn {
+            background: linear-gradient(135deg,#0284c7,#f472b6); color:#fff; border:none; padding:14px 28px;
+            border-radius:30px; font-weight:700; font-size:14px; cursor:pointer;
+            box-shadow: 0 8px 25px rgba(244,114,182,0.4);
+            opacity:0; transform: translateY(20px); pointer-events:none;
+            transition: all 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+        }
+        .start-web-btn.show { opacity:1; transform: translateY(0); pointer-events:auto; }
+
+        .bg-glow {
+            position: fixed; top:0; left:0; width:100%; height:100%; pointer-events:none;
+            background:
+                radial-gradient(circle at 15% 15%, rgba(186,230,253,0.9) 0%, transparent 45%),
+                radial-gradient(circle at 85% 85%, rgba(252,231,243,0.9) 0%, transparent 45%);
+            z-index:1;
+        }
+
+        .floating-elements { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:1; overflow:hidden; }
+        .float-item { position:absolute; bottom:-60px; font-size:24px; animation: floatUp 7s linear infinite; }
+        @keyframes floatUp {
+            0% { transform: translateY(0) rotate(0deg) scale(0.8); opacity:0; }
+            20%,80% { opacity:0.8; }
+            100% { transform: translateY(-105vh) rotate(360deg) scale(1.2); opacity:0; }
+        }
+
+        .app-container {
+            width:100%; max-width:440px; height:100vh; height:100dvh;
+            position:relative; z-index:3;
+            background: linear-gradient(180deg,#f0f9ff 0%,#fdf2f8 100%);
+            box-shadow: 0 0 50px rgba(244,114,182,0.2);
+            display:flex; flex-direction:column; overflow:hidden;
+        }
+        @media (min-width:441px) {
+            .app-container { height:92dvh; border-radius:36px; border:2px solid rgba(244,114,182,0.35); }
+        }
+
+        .screen {
+            display:none; flex-direction:column; align-items:center; justify-content:center;
+            height:100%; padding:24px; text-align:center; overflow-y:auto;
+        }
+        .screen.active { display:flex; animation: fadeIn 0.5s cubic-bezier(0.16,1,0.3,1) forwards; }
+        @keyframes fadeIn { from{opacity:0; transform:translateY(10px) scale(0.98);} to{opacity:1; transform:translateY(0) scale(1);} }
+
+        .envelope-container { cursor:pointer; padding:20px; transition: transform 0.3s ease; animation: floatEnv 3s ease-in-out infinite; }
+        .envelope-container:hover { transform: scale(1.1); }
+        @keyframes floatEnv { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-12px);} }
+        .envelope-box { font-size:95px; filter: drop-shadow(0 15px 25px rgba(244,114,182,0.4)); }
+
+        .lock-icon { font-size:44px; color:#db2777; margin-bottom:14px; animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-10px);} }
+        .lock-title { font-family:'Outfit',sans-serif; font-size:26px; font-weight:700; color:#0f172a; margin-bottom:6px; }
+        .lock-subtitle { font-size:13px; color:#db2777; margin-bottom:24px; }
+
+        .pin-dots { display:flex; gap:12px; margin-bottom:24px; }
+        .pin-dot { width:14px; height:14px; border-radius:50%; border:2px solid #f472b6; background:transparent; transition: all 0.3s ease; }
+        .pin-dot.filled { background:#f472b6; border-color:#f472b6; box-shadow: 0 0 12px rgba(244,114,182,0.7); transform: scale(1.15); }
+
+        .numpad { display:grid; grid-template-columns: repeat(3,68px); gap:12px; }
+        .num-btn {
+            width:68px; height:68px; border-radius:50%; border:1px solid rgba(244,114,182,0.4);
+            background: rgba(255,255,255,0.9); color:#0f172a; font-size:20px; font-weight:600;
+            display:flex; align-items:center; justify-content:center; cursor:pointer;
+            box-shadow: 0 4px 12px rgba(244,114,182,0.15); transition: all 0.2s ease;
+        }
+        .num-btn:active { background:#f472b6; color:#fff; transform: scale(0.9); }
+
+        .game-area { width:100%; height:280px; background: rgba(255,255,255,0.75); border:2px dashed rgba(244,114,182,0.5); border-radius:20px; position:relative; overflow:hidden; margin-bottom:16px; }
+        .falling-item { position:absolute; font-size:35px; cursor:pointer; user-select:none; animation: fallDown linear infinite; }
+        @keyframes fallDown { from{top:-50px;} to{top:300px;} }
+        .game-score { font-size:15px; font-weight:700; color:#db2777; margin-bottom:14px; }
+
+        .cake-reveal-container { cursor:pointer; padding:20px; transition: transform 0.3s cubic-bezier(0.175,0.885,0.32,1.275); }
+        .cake-reveal-container:hover { transform: scale(1.12); }
+        .big-animated-cake { font-size:110px; filter: drop-shadow(0 0 25px rgba(244,114,182,0.6)); animation: cakePulse 1.8s ease-in-out infinite; }
+        @keyframes cakePulse { 0%,100%{transform:scale(1) translateY(0);} 50%{transform:scale(1.08) translateY(-10px);} }
+
+        .celebration-banner-box {
+            background: linear-gradient(160deg, rgba(224,242,254,0.9), rgba(253,242,248,0.9));
+            border: 1.5px solid rgba(244,114,182,0.35);
+            border-radius: 28px; padding: 34px 22px; width:100%; max-width:360px; text-align:center;
+            box-shadow: 0 10px 26px rgba(2,132,199,0.12);
+            margin-bottom: 26px;
+        }
+        .celebration-title {
+            font-family:'Outfit',sans-serif; font-size:15px; font-weight:700; letter-spacing:2px;
+            text-transform:uppercase; color:#0369a1; margin-bottom:8px;
+        }
+        .celebration-name {
+            font-family:'Outfit',sans-serif; font-size:34px; font-weight:800; color:#db2777; margin-bottom:14px;
+        }
+        .celebration-desc { font-size:13.5px; color:#334155; line-height:1.65; }
+
+        .wish-screen-card {
+            background: rgba(255,255,255,0.85); border:1px solid rgba(244,114,182,0.3); border-radius:28px;
+            padding:28px 22px; width:100%; max-width:360px; text-align:left;
+            box-shadow: 0 10px 30px rgba(244,114,182,0.15); margin-bottom:24px; position:relative;
+        }
+        .wish-screen-card::after { content:'🎀✨'; position:absolute; top:-18px; right:25px; font-size:30px; }
+        .wish-screen-content {
+            font-size:14px; line-height:1.85; color:#1e293b;
+            max-height: 46vh; overflow-y: auto; padding-right: 6px; padding-bottom: 6px;
+        }
+        .wish-screen-content p { margin-bottom:14px; }
+        .wish-signature { text-align:right; margin-top:20px; font-weight:700; color:#db2777; font-size:16px; }
+
+        .nav-btn-container { width:100%; max-width:360px; }
+        .primary-btn {
+            background: linear-gradient(135deg,#0284c7,#f472b6); color:#fff; border:none; padding:15px 22px;
+            border-radius:30px; font-weight:700; font-size:14px; cursor:pointer;
+            box-shadow: 0 6px 20px rgba(244,114,182,0.4); width:100%; transition: transform 0.2s, opacity 0.2s;
+        }
+        .primary-btn:active { transform: scale(0.97); opacity:0.9; }
+
+        .content-scroll {
+            display:none; flex-direction:column; width:100%; height:100%;
+            overflow-y:auto; scroll-snap-type:y mandatory; -webkit-overflow-scrolling:touch;
+        }
+        .content-scroll.active { display:flex; }
+        .slide {
+            min-height:100%; width:100%; flex-shrink:0; scroll-snap-align:start;
+            display:flex; flex-direction:column; justify-content:center;
+            padding:28px 20px 40px; box-sizing:border-box; position:relative;
+        }
+        .slide-hint {
+            position:absolute; bottom:14px; left:50%; transform:translateX(-50%);
+            font-size:0.68rem; color:#db2777; opacity:0.6; animation: hintBob 1.6s ease-in-out infinite;
+        }
+        @keyframes hintBob { 0%,100%{transform:translate(-50%,0);} 50%{transform:translate(-50%,5px);} }
+
+        .section-header { text-align:center; margin-bottom:20px; }
+        .badge {
+            display:inline-block; padding:6px 14px; background: rgba(255,255,255,0.9);
+            border:1px solid rgba(244,114,182,0.4); border-radius:20px; font-size:11px; color:#db2777;
+            margin-bottom:10px; text-transform:uppercase; letter-spacing:1.2px; font-weight:700;
+        }
+
+        .music-player-card {
+            background: rgba(255,255,255,0.85); border:1px solid rgba(2,132,199,0.3); border-radius:20px;
+            padding:16px 20px; margin-bottom:20px; display:flex; align-items:center; gap:16px;
+            box-shadow: 0 8px 20px rgba(2,132,199,0.12);
+        }
+        .vinyl-disc {
+            width:50px; height:50px; background:#f472b6; border:3px solid #bae6fd; border-radius:50%;
+            display:flex; align-items:center; justify-content:center; font-size:22px; color:#fff;
+            flex-shrink:0; box-shadow: 0 0 10px rgba(244,114,182,0.5);
+        }
+        .vinyl-disc.playing { animation: spinVinyl 3s linear infinite; }
+        @keyframes spinVinyl { to{ transform: rotate(360deg); } }
+        .music-info { flex-grow:1; text-align:left; }
+        .music-title { font-size:13.5px; font-weight:700; color:#0f172a; margin-bottom:2px; }
+        .music-subtitle { font-size:11px; color:#db2777; }
+        .play-music-btn {
+            background: linear-gradient(135deg,#0284c7,#f472b6); color:#fff; border:none; width:42px; height:42px;
+            border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center;
+            font-size:16px; font-weight:bold; box-shadow: 0 0 12px rgba(244,114,182,0.4);
+        }
+
+        .card-box {
+            background: rgba(255,255,255,0.85); border:1px solid rgba(244,114,182,0.3); border-radius:24px;
+            padding:20px; box-shadow: 0 8px 25px rgba(244,114,182,0.12);
+        }
+        .vibe-grid { display:grid; grid-template-columns: repeat(2,1fr); gap:10px; margin-top:14px; }
+        .vibe-btn {
+            background:#fdf2f8; border:1px solid rgba(244,114,182,0.3); padding:12px; border-radius:14px;
+            color:#0f172a; font-size:12.5px; font-weight:600; cursor:pointer; transition: all 0.2s; text-align:center;
+        }
+        .vibe-btn:hover, .vibe-btn:active { background:#f472b6; color:#fff; border-color:#f472b6; }
+        .interactive-box {
+            background:#fdf2f8; border:1px solid rgba(244,114,182,0.3); border-radius:16px; padding:16px;
+            font-size:13px; color:#0f172a; min-height:65px; display:flex; align-items:center; justify-content:center;
+            margin-top:14px; text-align:center; line-height:1.5; font-weight:500;
+        }
+
+        /* Style untuk Slider Level Semangat */
+        .energy-slider-wrap { margin-top: 16px; text-align: left; }
+        .energy-slider-wrap label { font-size: 12.5px; font-weight: 700; color: #db2777; display: block; margin-bottom: 8px; }
+        .energy-range {
+            width: 100%; -webkit-appearance: none; appearance: none; height: 10px;
+            border-radius: 5px; background: #fdf2f8; outline: none; border: 1px solid rgba(244,114,182,0.4);
+        }
+        .energy-range::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none; width: 24px; height: 24px;
+            border-radius: 50%; background: #f472b6; cursor: pointer; box-shadow: 0 2px 6px rgba(244,114,182,0.5);
+        }
+
+        .jar-wrap { display:flex; flex-direction:column; align-items:center; margin-bottom: 12px; }
+        .jar-counter {
+            font-family:'Outfit',sans-serif; font-size:12px; font-weight:700; color:#0369a1;
+            background: rgba(186,230,253,0.8); padding:4px 12px; border-radius:20px; margin-bottom:10px;
+            box-shadow: 0 2px 8px rgba(2,132,199,0.1);
+        }
+        .jar-visual { position:relative; width:160px; height:185px; margin: 0 auto; filter: drop-shadow(0 12px 20px rgba(2,132,199,0.18)); }
+        .jar-lid { 
+            width:64px; height:14px; background: linear-gradient(135deg,#0ea5e9,#0284c7); 
+            border-radius:8px 8px 3px 3px; margin:0 auto; position:relative; z-index:3; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15); 
+        }
+        .jar-lid::after { content:'🎀'; position:absolute; top:-12px; left:50%; transform:translateX(-50%); font-size:16px; }
+        .jar-neck { width:46px; height:8px; background: rgba(2,132,199,0.4); margin:0 auto; position:relative; z-index:2; border-radius: 2px; }
+        .jar-body {
+            width:160px; height:160px; margin-top:-2px;
+            background: linear-gradient(160deg, rgba(255,255,255,0.7), rgba(224,242,254,0.6));
+            border: 2px solid rgba(2,132,199,0.3); border-radius: 20px 20px 48px 48px;
+            position:relative; overflow:hidden;
+            display:flex; flex-direction: column-reverse; align-items:center; gap:4px; padding:10px 8px;
+            backdrop-filter: blur(4px);
+        }
+        .jar-body::before {
+            content:''; position:absolute; top:8px; left:12px; width:14px; height:75%;
+            background: linear-gradient(180deg, rgba(255,255,255,0.8), transparent);
+            border-radius:50%; transform: rotate(5deg); pointer-events:none;
+        }
+        .jar-empty-label {
+            position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:11.5px; color:#0369a1;
+            font-weight:600; text-align:center; width: 85%; z-index:2; opacity: 0.7;
+        }
+        .jar-paper {
+            background:#fff; color:#db2777; padding:4px 10px; border-radius:10px; font-size:10px; font-weight:700;
+            box-shadow: 0 2px 5px rgba(244,114,182,0.2); animation: dropIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            width: 90%; text-align: center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; z-index:2;
+            transform: rotate(calc(-2deg + 4deg * var(--rand, 0.5)));
+        }
+        @keyframes dropIn { from{ transform: translateY(-30px) scale(0.4) rotate(0deg); opacity:0; } to{ transform: translateY(0) scale(1) rotate(0deg); opacity:1; } }
+
+        .input-custom {
+            width:100%; background:#fff; border:1px solid rgba(244,114,182,0.4); padding:10px 14px; border-radius:12px;
+            color:#0f172a; font-size:12.5px; margin-bottom:8px; outline:none;
+        }
+        .input-custom:focus { border-color:#f472b6; box-shadow: 0 0 8px rgba(244,114,182,0.3); }
+
+        .wish-list { margin-top:10px; max-height:18vh; overflow-y:auto; display:flex; flex-direction:column; gap:6px; text-align:left; }
+
+        .download-jar-btn {
+            background: linear-gradient(135deg,#38bdf8,#f472b6); margin-top:8px;
+        }
+        
+        .toast-notif {
+            position:fixed; bottom:30px; left:50%; transform: translateX(-50%) translateY(100px);
+            background: linear-gradient(135deg,#0284c7,#f472b6); color:#fff; padding:12px 24px; border-radius:30px;
+            font-size:13.5px; font-weight:700; box-shadow: 0 10px 25px rgba(244,114,182,0.4); z-index:999;
+            opacity:0; transition: all 0.4s cubic-bezier(0.175,0.885,0.32,1.275); pointer-events:none; text-align:center;
+        }
+        .toast-notif.show { transform: translateX(-50%) translateY(0); opacity:1; }
+    </style>
+</head>
+<body>
+
+    <div id="loadingScreen">
+        <div style="position:relative; margin-bottom:25px;">
+            <div class="loading-spinner-ring"></div>
+            <div class="loading-gift-icon">🎁</div>
+        </div>
+        <div class="loading-badge-first">✨ Untuk Aira</div>
+        <div class="loading-title-first">Preparing Something Special</div>
+        <div class="loading-subtitle-first" id="loadingStatusText">Menyiapkan kejutan ulang tahun khusus untukmu...</div>
+        <div class="percentage-text" id="loadingPercentText">0%</div>
+        <div class="progress-track"><div class="progress-fill" id="loadingProgressFill"></div></div>
+        <button class="start-web-btn" id="startWebBtn" onclick="dismissLoading()">Buka Kejutan Sekarang ✨</button>
+    </div>
+
+    <div class="bg-glow"></div>
+    <div class="floating-elements" id="floatingElements"></div>
+    <div class="toast-notif" id="toastNotif">✨ Harapan berhasil disimpan!</div>
+
+    <audio id="bgMusic" loop>
+        <source src="https://cdn.pixabay.com/download/audio/2022/10/14/audio_9939f792cb.mp3?filename=happy-birthday-to-you-piano-126485.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="app-container">
+
+        <div id="envelopeScreen" class="screen active">
+            <div class="badge">💌 Pesan Spesial</div>
+            <div class="lock-title" style="margin-top:10px;">Untuk: Aira Octaviani 💖</div>
+            <div class="lock-subtitle" style="margin-bottom:30px;">Ketuk amplop surat di bawah ini ya! ✨</div>
+            <div class="envelope-container" onclick="openEnvelope()"><div class="envelope-box">💌</div></div>
+            <div style="font-size:12px; color:#db2777; margin-top:15px; font-weight:600;">Buka surat rahasia 🔓</div>
+        </div>
+
+        <div id="lockScreen" class="screen">
+            <div class="lock-icon">🔒</div>
+            <div class="lock-title">Akses Spesial untuk Aira</div>
+            <div class="lock-subtitle" id="lockSubtitle">Masukkan Tanggal dan Bulan lahirmu 🔢</div>
+            <div class="pin-dots" id="pinDotsContainer">
+                <div class="pin-dot" id="dot0"></div><div class="pin-dot" id="dot1"></div>
+                <div class="pin-dot" id="dot2"></div><div class="pin-dot" id="dot3"></div>
+            </div>
+            <div class="numpad">
+                <button class="num-btn" onclick="pressNum('1')">1</button>
+                <button class="num-btn" onclick="pressNum('2')">2</button>
+                <button class="num-btn" onclick="pressNum('3')">3</button>
+                <button class="num-btn" onclick="pressNum('4')">4</button>
+                <button class="num-btn" onclick="pressNum('5')">5</button>
+                <button class="num-btn" onclick="pressNum('6')">6</button>
+                <button class="num-btn" onclick="pressNum('7')">7</button>
+                <button class="num-btn" onclick="pressNum('8')">8</button>
+                <button class="num-btn" onclick="pressNum('9')">9</button>
+                <button class="num-btn" onclick="clearPin()">×</button>
+                <button class="num-btn" onclick="pressNum('0')">0</button>
+                <button class="num-btn" onclick="backspacePin()">⌫</button>
+            </div>
+            <div style="margin-top:18px; font-size:11px; color:#db2777; font-weight:600;" id="pinHintText">Hint: Tanggal ultah kamu (0910) 🔑</div>
+        </div>
+
+        <div id="gameScreen" class="screen">
+            <div class="badge">🎮 Mini Game Seru</div>
+            <div class="lock-title" style="margin-bottom:4px;">Tangkap 7 Kejutan! 🎁</div>
+            <div class="game-score" id="gameScoreText">Item terkumpul: 0 / 7</div>
+            <div class="game-area" id="gameArea"></div>
+            <div style="font-size:12px; color:#db2777; font-weight:600;">Ketuk kue, kado, atau bintang (🎂🎁⭐) sebanyak 7 kali!</div>
+        </div>
+
+        <div id="giftScreen" class="screen">
+            <div class="badge">🎂 Kejutan Spesial</div>
+            <div class="lock-title" style="margin-bottom:6px;">Tiup Lilinnya! 🎉</div>
+            <div class="lock-subtitle" style="margin-bottom:25px;">Ketuk kue ulang tahun di bawah ini ya! 🕯️</div>
+            <div class="cake-reveal-container" onclick="openGift()"><div class="big-animated-cake">🎂</div></div>
+            <div style="font-size:12px; color:#db2777; margin-top:15px; font-weight:600;">Ketuk kuenya untuk melanjutkan ✨</div>
+        </div>
+
+        <div id="birthdayScreen" class="screen">
+            <div class="celebration-banner-box">
+                <div class="celebration-title">🎉 Happy Sweet Seventeen🎉</div>
+                <div class="celebration-name">Aira Octaviani 💖</div>
+                <div class="celebration-desc">Semoga hari istimewa ini membawa kebahagiaan, senyuman tulus, dan berkah melimpah dalam hidupmu. ✨🥳</div>
+            </div>
+            <div class="nav-btn-container">
+                <button class="primary-btn" onclick="goToWishScreen()">Lanjut ke Wish Spesial ➔</button>
+            </div>
+        </div>
+
+        <div id="wishScreen" class="screen">
+            <div class="badge" style="margin-bottom:12px;">💌 Pesan & Doa Khusus</div>
+            <div class="wish-screen-card">
+                <div class="wish-screen-content">
+                    <p><strong>Dear Aira, 🌸</strong></p>
+                    <p>Selamat ulang tahun ya! 🥳 pesannn dari aku untuk kamuu sayangg.
+kamuu kalo ada apaa apaa cerita sama aku yaaa, anggap aku adaaa jangan kamu pendem sendiriii,mau kamu cerita apapun itu pastii aku dengerinnn dan jugaa kamu jangan kecapean yaa banyakin istirahatt!! ,,, pokoknyaa kamu kalo ada apa apa harus ceritaa. kalo engga berarti kamu ga anggap akuu...</p>
+                    <p>ohh iyaaa untuk ultah kamu sweetttt seventeen yaaaa ahahaha pastii seruu wish you all the best yaa sayangg semoga yang kamu pengen bisa kesampaiannn teruss semoga kamu sehat sehat teruss yaaaa. 💕 🌟</p>
+                    <div class="wish-signature">Dari Pacarmu 🤍✨</div>
+                </div>
+            </div>
+            <div class="nav-btn-container">
+                <button class="primary-btn" onclick="goToMainDashboard()">Buka Beranda Eksklusif ➔</button>
+            </div>
+        </div>
+
+        <div id="mainContent" class="content-scroll">
+
+            <div class="slide">
+                <div class="section-header">
+                    <div class="badge">✨ Eksklusif Dashboard</div>
+                    <h1 style="font-size:24px; color:#0f172a;">Aira's Special Space 🌸</h1>
+                    <div style="margin-top:4px; font-size:12px; color:#db2777; font-weight:600;">WISH YOU ALL THE BEST TODAY 💖</div>
+                </div>
+                <div class="music-player-card">
+                    <div class="vinyl-disc" id="vinylDisc">🎵</div>
+                    <div class="music-info">
+                        <div class="music-title">Happy Birthday Aira 🎶</div>
+                        <div class="music-subtitle" id="musicStatus">Ketuk Play untuk putar musik 🎧</div>
+                    </div>
+                    <button class="play-music-btn" id="playBtn" onclick="toggleMusic()">▶</button>
+                </div>
+                <div class="slide-hint">↓ geser untuk lanjut</div>
+            </div>
+
+            <!-- Slide Interactive Zone (Pilih Doa / Vibe) -->
+            <div class="slide">
+                <div class="card-box" style="text-align:center;">
+                    <div class="badge" style="margin-bottom:4px;">Interactive Zone ✨</div>
+                    <h3 style="font-family:'Outfit',sans-serif; font-size:17px; margin-bottom:4px;">Pilih Doa Hari Ini 🔮</h3>
+                    <p style="font-size:11.5px; color:#db2777; margin-bottom:6px;">Ketuk tombol untuk melihat pesan di bawah! 👇</p>
+                    <div class="vibe-grid">
+                        <button class="vibe-btn" onclick="showVibe('karir')">💼 Karir & Sukses</button>
+                        <button class="vibe-btn" onclick="showVibe('sehat')">⚡ Sehat & Seru</button>
+                        <button class="vibe-btn" onclick="showVibe('cuan')">🎯 Banyak Cuan</button>
+                        <button class="vibe-btn" onclick="showVibe('bebas')">🚀 Bebas Stress</button>
+                    </div>
+                    <div class="interactive-box" id="vibeMsg">"Pilih salah satu tombol kategori di atas ya! ✨"</div>
+                </div>
+                <div class="slide-hint">↓ geser untuk lanjut</div>
+            </div>
+
+            <!-- Slide Interactive Zone Level Semangat (Pengganti Galeri Foto) -->
+            <div class="slide">
+                <div class="card-box" style="text-align:center;">
+                    <div class="badge" style="margin-bottom:4px;">Interactive Zone 🔥</div>
+                    <h3 style="font-family:'Outfit',sans-serif; font-size:17px; margin-bottom:4px;">Cek Level Semangatmu! 💪</h3>
+                    <p style="font-size:11.5px; color:#db2777; margin-bottom:10px;">Geser slider di bawah untuk melihat pesan penyemangatmu hari ini ✨</p>
+                    
+                    <div class="energy-slider-wrap">
+                        <label id="energyLabel" for="energyRange">Level Semangat: 50% (Membara! 🔥)</label>
+                        <input type="range" min="0" max="100" value="50" class="energy-range" id="energyRange" oninput="updateEnergyLevel(this.value)">
+                    </div>
+
+                    <div class="interactive-box" id="energyMsg" style="margin-top: 16px;">
+                        "Wah, semangatmu stabil dan siap menaklukkan hari ini dengan senyuman! ✨"
+                    </div>
+                </div>
+                <div class="slide-hint">↓ geser untuk lanjut</div>
+            </div>
+
+            <div class="slide">
+                <div class="card-box">
+                    <div class="badge" style="margin-bottom:8px;">🫙 Botol Jar Harapan Masa Depan</div>
+                    <h3 style="font-family:'Outfit',sans-serif; font-size:15px; margin-bottom:4px; text-align:center;">Masukkan Doa & Lihat Kumpulannya ✨</h3>
+                    <div class="jar-wrap">
+                        <div class="jar-counter" id="jarCounter">0 harapan tersimpan 📝</div>
+                        <div class="jar-visual">
+                            <div class="jar-lid"></div>
+                            <div class="jar-neck"></div>
+                            <div class="jar-body" id="jarContainer">
+                                <div class="jar-empty-label" id="jarLabelText">Jar masih kosong ✨ yuk isi doa!</div>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="text" class="input-custom" id="wishInput" placeholder="Contoh: Semoga tahun ini bisa keliling dunia! ✈️">
+                    <div style="display:flex; gap:8px; margin-bottom:6px;">
+                        <button class="primary-btn" onclick="addWish()" style="padding:11px 16px; font-size:13px; flex:2;">Masukkan ke Jar ✨</button>
+                        <button class="primary-btn" onclick="clearJar()" style="padding:11px 16px; font-size:13px; flex:1; background: linear-gradient(135deg,#cbd5e1,#94a3b8); box-shadow: 0 4px 15px rgba(148,163,184,0.3);">Reset 🗑️</button>
+                    </div>
+                    <button class="primary-btn download-jar-btn" onclick="downloadJarImage()">Unduh Gambar Jar 📥</button>
+                    <div class="wish-list" id="wishList"></div>
+                </div>
+                <div class="slide-hint">↓ geser untuk lanjut</div>
+            </div>
+
+            <div class="slide">
+                <div class="card-box" style="text-align:center; padding: 32px 20px;">
+                    <div class="badge" style="margin-bottom:8px;">✨ Selesai ✨</div>
+                    <h2 style="font-family:'Outfit',sans-serif; font-size:20px; color:#0f172a; margin-bottom:14px;">The Grand Finale 🎂</h2>
+                    <div class="big-animated-cake" style="font-size: 95px; margin: 10px 0 20px 0;" onclick="fireConfetti(80)">🎂</div>
+                    <p style="font-size: 13.5px; color: #334155; line-height: 1.6; margin-bottom: 20px;">Terima kasih sudah menjelajahi kejutan spesial ini, Aira! Semoga ulang tahunmu tahun ini sangat berkesan dan indah. 💖✨</p>
+                    <button class="primary-btn" onclick="fireConfetti(100); showToast('🎉 Happy Birthday Aira!');">Rayakan Lagi 🎉</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <canvas id="exportCanvas" style="display:none;"></canvas>
+
+<script>
+    function fireConfetti(count) {
+        count = count || 60;
+        const colors = ['#0284c7', '#f472b6', '#ffffff', '#bae6fd', '#fef08a'];
+        for (let i = 0; i < count; i++) {
+            const c = document.createElement('div');
+            c.style.position = 'fixed';
+            c.style.top = '-10px';
+            c.style.left = Math.random() * 100 + 'vw';
+            const size = 6 + Math.random() * 6;
+            c.style.width = size + 'px';
+            c.style.height = size + 'px';
+            c.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            c.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+            c.style.zIndex = '9999';
+            c.style.pointerEvents = 'none';
+            document.body.appendChild(c);
+            
+            const duration = 2 + Math.random() * 2;
+            c.style.transition = `transform ${duration}s linear, opacity ${duration}s ease`;
+            setTimeout(() => {
+                c.style.transform = `translate(${Math.random() * 100 - 50}vw, ${window.innerHeight + 50}px) rotate(${Math.random() * 360}deg)`;
+                c.style.opacity = '0';
+            }, 50);
+            setTimeout(() => c.remove(), duration * 1000);
+        }
+    }
+
+    function showToast(msg) {
+        const t = document.getElementById('toastNotif');
+        t.innerText = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2500);
+    }
+
+    // Loading Progress Simulation
+    let loadProgress = 0;
+    const interval = setInterval(() => {
+        loadProgress += 2;
+        document.getElementById('loadingProgressFill').style.width = loadProgress + '%';
+        document.getElementById('loadingPercentText').innerText = loadProgress + '%';
+        if (loadProgress >= 100) {
+            clearInterval(interval);
+            document.getElementById('loadingStatusText').innerText = 'Kejutan siap dibuka!';
+            document.getElementById('startWebBtn').classList.add('show');
+        }
+    }, 30);
+
+    function dismissLoading() {
+        const screen = document.getElementById('loadingScreen');
+        screen.style.opacity = '0';
+        screen.style.visibility = 'hidden';
+        startFloatingElements();
+    }
+
+    function startFloatingElements() {
+        const container = document.getElementById('floatingElements');
+        const emojis = ['🎈', '✨', '💖', '⭐', '🎂', '🎁'];
+        setInterval(() => {
+            const item = document.createElement('div');
+            item.className = 'float-item';
+            item.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+            item.style.left = Math.random() * 100 + 'vw';
+            item.style.animationDuration = (5 + Math.random() * 5) + 's';
+            container.appendChild(item);
+            setTimeout(() => item.remove(), 10000);
+        }, 800);
+    }
+
+    function openEnvelope() {
+        document.getElementById('envelopeScreen').classList.remove('active');
+        document.getElementById('lockScreen').classList.add('active');
+    }
+
+    // PIN Logic
+    let currentPin = '';
+    const correctPin = '0910';
+
+    function pressNum(num) {
+        if (currentPin.length < 4) {
+            currentPin += num;
+            updatePinDots();
+            if (currentPin.length === 4) {
+                setTimeout(checkPin, 200);
+            }
+        }
+    }
+
+    function backspacePin() {
+        currentPin = currentPin.slice(0, -1);
+        updatePinDots();
+    }
+
+    function clearPin() {
+        currentPin = '';
+        updatePinDots();
+    }
+
+    function updatePinDots() {
+        for (let i = 0; i < 4; i++) {
+            const dot = document.getElementById('dot' + i);
+            if (i < currentPin.length) {
+                dot.classList.add('filled');
+            } else {
+                dot.classList.remove('filled');
+            }
+        }
+    }
+
+    function checkPin() {
+        if (currentPin === correctPin) {
+            showToast('🎉 PIN Benar! Masuk ke Mini Game');
+            document.getElementById('lockScreen').classList.remove('active');
+            document.getElementById('gameScreen').classList.add('active');
+            initGame();
+        } else {
+            showToast('❌ PIN Salah! Coba lagi (0910)');
+            document.getElementById('lockScreen').classList.add('error-shake');
+            setTimeout(() => document.getElementById('lockScreen').classList.remove('error-shake'), 400);
+            currentPin = '';
+            updatePinDots();
+        }
+    }
+
+    // Mini Game Logic (Diperbaiki: hanya item yang benar 🎂, 🎁, ⭐ yang dihitung)
+    let score = 0;
+    const targetScore = 7;
+    let gameInterval = null;
+
+    function initGame() {
+        score = 0;
+        document.getElementById('gameScoreText').innerText = `Item terkumpul: ${score} / ${targetScore}`;
+        const area = document.getElementById('gameArea');
+        area.innerHTML = '';
+        
+        gameInterval = setInterval(() => {
+            spawnGameItem();
+        }, 600);
+    }
+
+    function spawnGameItem() {
+        const area = document.getElementById('gameArea');
+        if (!area || document.getElementById('gameScreen').style.display === 'none') return;
+        
+        const item = document.createElement('div');
+        item.className = 'falling-item';
+        
+        // Definisikan item benar dan salah secara terpisah agar aman
+        const correctItems = ['🎂', '🎁', '⭐'];
+        const wrongItems = ['💣', '⚡', '💧', '❌'];
+        
+        // 75% kemungkinan muncul item benar, 25% item salah sebagai jebakan
+        const isCorrect = Math.random() > 0.25;
+        const emoji = isCorrect 
+            ? correctItems[Math.floor(Math.random() * correctItems.length)]
+            : wrongItems[Math.floor(Math.random() * wrongItems.length)];
+            
+        item.innerText = emoji;
+        item.style.left = Math.random() * (area.clientWidth - 40) + 'px';
+        
+        const duration = 3 + Math.random() * 2;
+        item.style.animationDuration = duration + 's';
+        
+        item.addEventListener('click', () => {
+            if (isCorrect) {
+                score++;
+                showToast('+1 Poin! ✨');
+            } else {
+                score = Math.max(0, score - 1);
+                showToast('❌ Ups, itu bukan target! Skor -1');
+            }
+            document.getElementById('gameScoreText').innerText = `Item terkumpul: ${score} / ${targetScore}`;
+            item.remove();
+            
+            if (score >= targetScore) {
+                clearInterval(gameInterval);
+                fireConfetti(80);
+                setTimeout(() => {
+                    document.getElementById('gameScreen').classList.remove('active');
+                    document.getElementById('giftScreen').classList.add('active');
+                }, 800);
+            }
+        });
+        
+        area.appendChild(item);
+        setTimeout(() => item.remove(), duration * 1000);
+    }
+
+    function openGift() {
+        fireConfetti(100);
+        document.getElementById('giftScreen').classList.remove('active');
+        document.getElementById('birthdayScreen').classList.add('active');
+    }
+
+    function goToWishScreen() {
+        document.getElementById('birthdayScreen').classList.remove('active');
+        document.getElementById('wishScreen').classList.add('active');
+    }
+
+    function goToMainDashboard() {
+        document.getElementById('wishScreen').classList.remove('active');
+        document.getElementById('mainContent').classList.add('active');
+        fireConfetti(120);
+    }
+
+    // Music Player Logic
+    let isPlaying = false;
+    function toggleMusic() {
+        const audio = document.getElementById('bgMusic');
+        const disc = document.getElementById('vinylDisc');
+        const btn = document.getElementById('playBtn');
+        const status = document.getElementById('musicStatus');
+        
+        if (!isPlaying) {
+            audio.play().catch(() => {});
+            disc.classList.add('playing');
+            btn.innerText = '⏸';
+            status.innerText = 'Sedang diputar... Enjoy! 🎶';
+            isPlaying = true;
+        } else {
+            audio.pause();
+            disc.classList.remove('playing');
+            btn.innerText = '▶';
+            status.innerText = 'Musik dijeda 🎧';
+            isPlaying = false;
+        }
+    }
+
+    // Interactive Zone (Vibe) Logic
+    function showVibe(type) {
+        const msgBox = document.getElementById('vibeMsg');
+        const messages = {
+            karir: "💼 Doa Karir: Semoga tahun ini sekolah makin pintar, sukses besar, dan semua kerja kerasmu berbuah hasil yang luar biasa manis! ✨",
+            sehat: "⚡ Doa Sehat: Semoga tubuh selalu bugar, energi positif selalu mengalir, dan hari-harimu penuh dengan gelak tawa yang membahagiakan! 🌟",
+            cuan: "🎯 Doa Cuan: Semoga rezekinya mengalir deras, dompet tebal terus, dan bisa beli semua barang impian tanpa mikir dua kali! 💰",
+            bebas: "🚀 Doa Bebas Stress: Semoga dijauhkan dari overthinking, hati selalu tenang, dan setiap masalah ada jalan keluarnya dengan mudah! 🌸"
+        };
+        msgBox.innerHTML = messages[type];
+        fireConfetti(30);
+    }
+
+    // Interactive Zone Level Semangat Logic
+    function updateEnergyLevel(val) {
+        const label = document.getElementById('energyLabel');
+        const msg = document.getElementById('energyMsg');
+        
+        if (val < 30) {
+            label.innerText = `Level Semangat: ${val}% (Butuh Istirahat & Healing ☕)`;
+            msg.innerHTML = `"Jangan diporsir ya! Ambil waktu sejenak buat tarik napas dan istirahat. Kamu sudah hebat sejauh ini! 🌸"`;
+        } else if (val < 70) {
+            label.innerText = `Level Semangat: ${val}% (Stabil & Santai ✨)`;
+            msg.innerHTML = `"Wah, semangatmu stabil dan siap menaklukkan hari ini dengan senyuman serta energi positif! 🌟"`;
+        } else {
+            label.innerText = `Level Semangat: ${val}% (Membara & Tak Terhentikan! 🔥)`;
+            msg.innerHTML = `"Luar biasa! Energi membara penuh ambisi, tidak ada yang bisa menghentikan langkah hebatmu hari ini! 🚀💪"`;
+        }
+    }
+
+    // Jar Harapan Logic
+    let wishes = [];
+    function addWish() {
+        const input = document.getElementById('wishInput');
+        const val = input.value.trim();
+        if (!val) {
+            showToast('⚠️ Ketik doanya dulu ya!');
+            return;
+        }
+        wishes.push(val);
+        input.value = '';
+        updateJar();
+        showToast('✨ Harapan berhasil dimasukkan ke Jar!');
+        fireConfetti(40);
+    }
+
+    function clearJar() {
+        wishes = [];
+        updateJar();
+        showToast('🗑️ Jar telah dikosongkan!');
+    }
+
+    function updateJar() {
+        const jarContainer = document.getElementById('jarContainer');
+        const counter = document.getElementById('jarCounter');
+        const labelText = document.getElementById('jarLabelText');
+        const wishList = document.getElementById('wishList');
+        
+        counter.innerText = `${wishes.length} harapan tersimpan 📝`;
+        
+        // Hapus elemen kertas lama di dalam jar (kecuali label kosong)
+        const papers = jarContainer.querySelectorAll('.jar-paper');
+        papers.forEach(p => p.remove());
+        
+        if (wishes.length === 0) {
+            labelText.style.display = 'block';
+        } else {
+            labelText.style.display = 'none';
+            // Tampilkan visual kertas menumpuk di dalam jar (maksimal 6 visual terakhir agar tidak overflow)
+            wishes.slice(-6).forEach((w, index) => {
+                const paper = document.createElement('div');
+                paper.className = 'jar-paper';
+                paper.style.setProperty('--rand', Math.random());
+                paper.innerText = w;
+                jarContainer.appendChild(paper);
+            });
+        }
+        
+        // Render daftar harapan di bawah tombol
+        wishList.innerHTML = '';
+        wishes.forEach((w, idx) => {
+            const card = document.createElement('div');
+            card.style.cssText = 'background:#fff; border:1px solid rgba(244,114,182,0.3); padding:8px 12px; border-radius:10px; font-size:11.5px; color:#0f172a; display:flex; justify-content:space-between; align-items:center;';
+            card.innerHTML = `<span>✨ ${w}</span><span style="color:#db2777; font-weight:700; cursor:pointer;" onclick="deleteWish(${idx})">✕</span>`;
+            wishList.appendChild(card);
+        });
+    }
+
+    function deleteWish(idx) {
+        wishes.splice(idx, 1);
+        updateJar();
+        showToast('🗑️ Harapan dihapus');
+    }
+
+    /* ======================================================
+       FITUR: unduh gambar jar berisi bentuk jar + semua
+       harapan yang sudah ditulis, dalam satu file PNG.
+       ====================================================== */
+    function roundRect(ctx, x, y, width, height, radius, fill) {
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.lineTo(x + width - radius, y);
+        ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+        ctx.lineTo(x + width, y + height - radius);
+        ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+        ctx.lineTo(x + radius, y + height);
+        ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+        ctx.lineTo(x, y + radius);
+        ctx.quadraticCurveTo(x, y, x + radius, y);
+        ctx.closePath();
+        if (fill) ctx.fill();
+    }
+
+    function downloadJarImage() {
+        if (wishes.length === 0) {
+            showToast('⚠️ Jar masih kosong, tulis harapan dulu ya!');
+            return;
+        }
+
+        const canvas = document.getElementById('exportCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const lineH = 26;
+        const headerH = 260;
+        const footerH = 60;
+        canvas.width = 600;
+        canvas.height = headerH + (wishes.length * lineH) + footerH;
+
+        // background
+        const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        grad.addColorStop(0, '#eff8ff');
+        grad.addColorStop(1, '#fdf2f8');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // frame
+        ctx.strokeStyle = '#f472b6';
+        ctx.lineWidth = 6;
+        ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
+
+        // title
+        ctx.fillStyle = '#db2777';
+        ctx.font = 'bold 22px Outfit, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('🫙 Wish Jar Aira', canvas.width / 2, 58);
+        ctx.font = '12px "Plus Jakarta Sans", sans-serif';
+        ctx.fillStyle = '#0369a1';
+        ctx.fillText(`${wishes.length} harapan tersimpan`, canvas.width / 2, 80);
+
+        // ===== gambar jar =====
+        const jarCenterX = canvas.width / 2;
+        const jarTopY = 95;
+        const jarW = 150, jarH = 140;
+        const jarX = jarCenterX - jarW / 2;
+
+        // lid
+        ctx.fillStyle = '#0284c7';
+        roundRect(ctx, jarCenterX - 32, jarTopY, 64, 14, 6, true);
+        ctx.font = '16px sans-serif';
+        ctx.fillText('🎀', jarCenterX, jarTopY - 6);
+
+        // neck
+        ctx.fillStyle = 'rgba(2,132,199,0.4)';
+        ctx.fillRect(jarCenterX - 22, jarTopY + 14, 44, 8);
+
+        // body
+        const bodyY = jarTopY + 22;
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(jarX + 18, bodyY);
+        ctx.lineTo(jarX + jarW - 18, bodyY);
+        ctx.quadraticCurveTo(jarX + jarW, bodyY, jarX + jarW, bodyY + 36);
+        ctx.lineTo(jarX + jarW, bodyY + jarH - 36);
+        ctx.quadraticCurveTo(jarX + jarW, bodyY + jarH, jarX + jarW - 36, bodyY + jarH);
+        ctx.lineTo(jarX + 36, bodyY + jarH);
+        ctx.quadraticCurveTo(jarX, bodyY + jarH, jarX, bodyY + jarH - 36);
+        ctx.lineTo(jarX, bodyY + 36);
+        ctx.quadraticCurveTo(jarX, bodyY, jarX + 18, bodyY);
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(224,242,254,0.6)';
+        ctx.fill();
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = 'rgba(2,132,199,0.35)';
+        ctx.stroke();
+        ctx.clip();
+
+        // glass shine
+        ctx.fillStyle = 'rgba(255,255,255,0.55)';
+        ctx.fillRect(jarX + 12, bodyY + 14, 11, jarH - 34);
+
+        // papers stacked inside jar (show up to 7 most recent)
+        const showCount = Math.min(wishes.length, 7);
+        let py = bodyY + jarH - 20;
+        for (let i = 0; i < showCount; i++) {
+            const w = wishes[wishes.length - 1 - i];
+            ctx.save();
+            ctx.translate(jarCenterX, py);
+            ctx.rotate((i % 2 === 0 ? 1 : -1) * 0.04);
+            ctx.fillStyle = i % 2 === 0 ? '#ffffff' : '#fdf2f8';
+            roundRect(ctx, -58, -10, 116, 20, 7, true);
+            ctx.fillStyle = '#db2777';
+            ctx.font = 'bold 9.5px "Plus Jakarta Sans", sans-serif';
+            ctx.textAlign = 'center';
+            let short = w.length > 17 ? w.substring(0, 15) + '…' : w;
+            ctx.fillText(short, 0, 3);
+            ctx.restore();
+            py -= 22;
+        }
+        ctx.restore();
+
+        // ===== daftar semua harapan =====
+        let listY = headerH;
+        ctx.textAlign = 'left';
+        wishes.forEach((w, idx) => {
+            ctx.fillStyle = '#f472b6';
+            ctx.beginPath();
+            ctx.arc(48, listY - 5, 4, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#0f172a';
+            ctx.font = '13px "Plus Jakarta Sans", sans-serif';
+            let text = w.length > 55 ? w.substring(0, 53) + '…' : w;
+            ctx.fillText(`${idx + 1}. ${text}`, 62, listY);
+            listY += lineH;
+        });
+
+        // footer
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#db2777';
+        ctx.font = 'bold 14px Outfit, sans-serif';
+        ctx.fillText('Amin, Semoga Semuanya Terwujud yaa! 💖', canvas.width / 2, canvas.height - 26);
+
+        const link = document.createElement('a');
+        link.download = 'WishJar_Aira.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        showToast('📥 Gambar Wish Jar berhasil diunduh!');
+    }
+</script>
+</body>
+</html>
